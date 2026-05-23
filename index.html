@@ -275,17 +275,14 @@ section{padding:64px 22px;position:relative}
   letter-spacing:.06em;padding:13px 20px;border-radius:40px;z-index:9500;opacity:0;
   box-shadow:var(--shadow);transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .35s ease;max-width:86vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.petal{position:fixed;top:-30px;z-index:9400;pointer-events:none;font-size:20px;
-  will-change:transform}
-@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
-.tulip{position:fixed;top:-60px;z-index:9400;pointer-events:none;will-change:transform;
+.bloom{position:fixed;top:-60px;z-index:9400;pointer-events:none;will-change:transform;
   filter:drop-shadow(0 4px 6px rgba(42,31,28,.18))}
-.tulip svg{display:block;width:100%;height:100%}
-@keyframes tulipfall{
+.bloom svg{display:block;width:100%;height:100%}
+@keyframes bloomfall{
   0%{transform:translate(0,-14vh) rotate(var(--r));opacity:0}
   8%{opacity:1}
   50%{transform:translate(var(--dx),52vh) rotate(calc(var(--r) + (var(--spin) * .5)))}
-  100%{transform:translate(calc(var(--dx) * -.5),116vh) rotate(calc(var(--r) + var(--spin)));opacity:.3}
+  100%{transform:translate(calc(var(--dx) * -.5),116vh) rotate(calc(var(--r) + var(--spin)));opacity:.32}
 }
 
 body.dark{--paper:#1c1614;--paper-2:#241c19;--ink:#f1e6da;--ink-soft:#bfa996;
@@ -609,45 +606,53 @@ const CONFIG = {
     clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),3600);}
 
   /* ---- petals ---- */
-  const PET=["✿","❀","🌸","✦","♥"];
-  function petals(n=26){
+  /* ---- flowers (hand-drawn SVG, brand palette): tulip, daisy, blossom, wild rose ---- */
+  const G1="#6fa368",G2="#5e8a5a",GS="#6b9a64";
+  const PALS=[
+    {m:"#e0556a",l:"#ef8294",d:"#c9415a"},   // coral
+    {m:"#d87a93",l:"#ecaebd",d:"#bd5c75"},   // rose
+    {m:"#e8b96a",l:"#f3d59a",d:"#cf9a44"},   // gold
+    {m:"#ecaebd",l:"#f5cdd7",d:"#d98aa0"},   // blush
+    {m:"#d96b6b",l:"#e89393",d:"#bf5252"}    // warm red
+  ];
+  const CTR=["#e8b96a","#cf9a44","#d98a3a","#f3d59a"];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function svgTulip(c){return `<svg viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">`+
+    `<path d="M20 36 C20 46 19.5 53 20 58" stroke="${GS}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`+
+    `<path d="M20 46 C13.5 44 8.5 46.5 5.5 52.5 C12 53 16.8 50.8 20 46Z" fill="${G1}"/>`+
+    `<path d="M20 41 C25.5 39.5 30 41.5 32.5 46.5 C26.8 47 22.8 45.2 20 41Z" fill="${G2}"/>`+
+    `<path d="M20 5 C18 9 15 9.5 14 13 C12.5 9.5 9.5 10.5 9 15 C8.3 24 11.5 34 20 36 C28.5 34 31.7 24 31 15 C30.5 10.5 27.5 9.5 26 13 C25 9.5 22 9 20 5Z" fill="${c.m}"/>`+
+    `<path d="M20 5 C18 9 16.5 11 16 15 C16 23 17.5 31 20 34 C22.5 31 24 23 24 15 C23.5 11 22 9 20 5Z" fill="${c.l}"/>`+
+    `<path d="M14 30 C16 33 18 35 20 36 C22 35 24 33 26 30 C24 32 22 33 20 33 C18 33 16 32 14 30Z" fill="${c.d}" opacity=".4"/></svg>`;}
+  function svgDaisy(c){let g="";for(let a=0;a<360;a+=45)g+=`<ellipse cx="24" cy="11" rx="5" ry="10" transform="rotate(${a} 24 24)"/>`;
+    return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g fill="${c.m}">${g}</g><circle cx="24" cy="24" r="6.5" fill="${pick(CTR)}"/></svg>`;}
+  function svgBlossom(c){const p="M24 25 C20 21 19 13 21 8 C21.5 6.5 22.6 7.6 24 9 C25.4 7.6 26.5 6.5 27 8 C29 13 28 21 24 25Z";
+    let g="";for(let a=0;a<360;a+=72)g+=`<path d="${p}" transform="rotate(${a} 24 24)"/>`;
+    return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g fill="${c.l}">${g}</g><circle cx="24" cy="24" r="3" fill="#d98a3a"/></svg>`;}
+  function svgRose(c){return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g fill="${c.m}">`+
+    `<circle cx="24" cy="13" r="8"/><circle cx="35.4" cy="18.5" r="8"/><circle cx="35.4" cy="29.5" r="8"/>`+
+    `<circle cx="24" cy="35" r="8"/><circle cx="12.6" cy="29.5" r="8"/><circle cx="12.6" cy="18.5" r="8"/></g>`+
+    `<circle cx="24" cy="24" r="7" fill="${c.l}"/><circle cx="24" cy="24" r="3.2" fill="${pick(CTR)}"/></svg>`;}
+  function bloomRain(n=30){
     for(let i=0;i<n;i++){
-      const p=document.createElement("div");p.className="petal";
-      p.textContent=PET[Math.floor(Math.random()*PET.length)];
-      p.style.left=Math.random()*100+"vw";
-      p.style.fontSize=(14+Math.random()*20)+"px";
-      const dur=4+Math.random()*4;
-      p.style.animation=`fall ${dur}s linear ${Math.random()*1.2}s forwards`;
-      p.style.opacity=.5+Math.random()*.5;
-      document.body.appendChild(p);
-      setTimeout(()=>p.remove(),(dur+1.4)*1000);
-    }
-  }
-
-  /* ---- tulips (hand-drawn SVG, brand palette) ---- */
-  const TULIP_COLORS=[{p:"#e0556a",s:"#c9415a"},{p:"#d8849a",s:"#b85c75"},
-    {p:"#e8b96a",s:"#c99544"},{p:"#d96b6b",s:"#bf5252"}];
-  function tulipSVG(c){return `<svg viewBox="0 0 40 64" xmlns="http://www.w3.org/2000/svg">`+
-    `<path d="M20 40 C20 40 20 24 20 16" stroke="#5e8a5a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`+
-    `<path d="M20 34 C13 33 8 28 8 21 C13 22 18 26 20 33Z" fill="#6fa368"/>`+
-    `<path d="M20 30 C26 30 31 25 31 19 C26 20 22 23 20 29Z" fill="#5e8a5a"/>`+
-    `<path d="M20 4 C18.5 9 15.5 10 15 14 C13 10 9.5 11 9 16 C8.5 24 12 33 20 35 C28 33 31.5 24 31 16 C30.5 11 27 10 25 14 C24.5 10 21.5 9 20 4Z" fill="${c.p}"/>`+
-    `<path d="M20 4 C18.5 9 15.5 10 15 14 C16.5 17 18 20 20 35 C22 20 23.5 17 25 14 C24.5 10 21.5 9 20 4Z" fill="${c.s}" opacity=".5"/></svg>`;}
-  function tulipRain(n=28){
-    for(let i=0;i<n;i++){
-      const t=document.createElement("div");t.className="tulip";
-      const c=TULIP_COLORS[Math.floor(Math.random()*TULIP_COLORS.length)];
-      const w=16+Math.random()*26;
-      t.style.width=w+"px";t.style.height=(w*1.55)+"px";
-      t.style.left=Math.random()*100+"vw";
-      t.style.setProperty("--r",(Math.random()*40-20)+"deg");
-      t.style.setProperty("--spin",(Math.random()*220-110)+"deg");
-      t.style.setProperty("--dx",(Math.random()*120-60)+"px");
+      const el=document.createElement("div");el.className="bloom";
+      const c=pick(PALS);const r=Math.random();
+      let svg,ratio=1;
+      if(r<0.42){svg=svgTulip(c);ratio=1.5;}        // tulips stay the star (~42%)
+      else if(r<0.62){svg=svgDaisy(c);}
+      else if(r<0.82){svg=svgBlossom(c);}
+      else{svg=svgRose(c);}
+      const w=16+Math.random()*24;
+      el.style.width=w+"px";el.style.height=(w*ratio)+"px";
+      el.style.left=Math.random()*100+"vw";
+      el.style.setProperty("--r",(Math.random()*40-20)+"deg");
+      el.style.setProperty("--spin",(Math.random()*220-110)+"deg");
+      el.style.setProperty("--dx",(Math.random()*130-65)+"px");
       const dur=4.5+Math.random()*3.5;
-      t.style.animation=`tulipfall ${dur}s cubic-bezier(.45,0,.7,1) ${Math.random()*.9}s forwards`;
-      t.innerHTML=tulipSVG(c);
-      document.body.appendChild(t);
-      setTimeout(()=>t.remove(),(dur+1.4)*1000);
+      el.style.animation=`bloomfall ${dur}s cubic-bezier(.45,0,.7,1) ${Math.random()*.9}s forwards`;
+      el.innerHTML=svg;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),(dur+1.4)*1000);
     }
   }
 
@@ -657,7 +662,7 @@ const CONFIG = {
     let hc=0,hTimer;
     secretSpot.addEventListener("click",()=>{
       hc++;clearTimeout(hTimer);hTimer=setTimeout(()=>hc=0,1200);
-      if(hc>=5){hc=0;tulipRain(34);toast(C?C.secret:"♥");}
+      if(hc>=5){hc=0;bloomRain(38);toast(C?C.secret:"♥");}
       else{secretSpot.animate([{transform:"scale(1.4)"},{transform:"scale(1)"}],{duration:260});}
     });
   }
@@ -668,7 +673,7 @@ const CONFIG = {
     if(e.key && e.key.length===1){
       typed=(typed+e.key.toLowerCase()).slice(-5);
       if(typed==="mansi"){typed="";document.body.classList.toggle("dark");
-        toast("darkroom mode · developing memories");petals(18);}
+        toast("darkroom mode · developing memories");bloomRain(24);}
     }
   });
 
@@ -678,7 +683,7 @@ const CONFIG = {
     const a=e.accelerationIncludingGravity;if(!a)return;
     const force=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
     if(force>34 && Date.now()-lastShake>1500){lastShake=Date.now();
-      petals(30);toast("✦ caught a little magic");}
+      bloomRain(34);toast("✦ caught a little magic");}
   }
   // iOS needs a permission tap; wire it to the first screen touch.
   function armMotion(){
@@ -692,10 +697,10 @@ const CONFIG = {
 
   /* ===== EASTER EGG 4 · long-press the cover photo ===== */
   let lp;const cp=$("#coverPhoto");
-  cp.addEventListener("touchstart",()=>{lp=setTimeout(()=>{petals(20);
+  cp.addEventListener("touchstart",()=>{lp=setTimeout(()=>{bloomRain(24);
     toast("📸 you held on. so will i.");},650)},{passive:true});
   cp.addEventListener("touchend",()=>clearTimeout(lp));
-  cp.addEventListener("mousedown",()=>{lp=setTimeout(()=>{petals(20);
+  cp.addEventListener("mousedown",()=>{lp=setTimeout(()=>{bloomRain(24);
     toast("📸 you held on. so will i.");},650)});
   cp.addEventListener("mouseup",()=>clearTimeout(lp));
 
