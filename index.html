@@ -272,9 +272,9 @@ section{padding:64px 22px;position:relative}
 /* ============ toast + petals + darkroom ============ */
 .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(140%);
   background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.72rem;
-  letter-spacing:.06em;padding:13px 20px;border-radius:40px;z-index:9500;
-  box-shadow:var(--shadow);transition:transform .5s cubic-bezier(.16,1,.3,1);max-width:86vw;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0)}
+  letter-spacing:.06em;padding:13px 20px;border-radius:40px;z-index:9500;opacity:0;
+  box-shadow:var(--shadow);transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .35s ease;max-width:86vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .petal{position:fixed;top:-30px;z-index:9400;pointer-events:none;font-size:20px;
   will-change:transform}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
@@ -296,6 +296,75 @@ body.dark .ribbon{background:#000}
 body{transition:background-color .6s ease,color .6s ease}
 
 @media (max-width:380px){.frame{width:170px}}
+
+/* ===================================================================
+   LAPTOP / DESKTOP  (>= 920px) : phone layout below this is untouched
+   =================================================================== */
+@media (min-width:920px){
+  body{background-attachment:fixed}
+
+  /* ---- COVER becomes an editorial split: text left, full-height photo right ---- */
+  .cover{
+    display:grid;max-width:1180px;margin:0 auto;min-height:100vh;
+    grid-template-columns:0.92fr 1.08fr;
+    grid-template-rows:auto 1fr auto;
+    grid-template-areas:"top photo" "title photo" "foot photo";
+    column-gap:60px;row-gap:0;padding:48px 60px;
+  }
+  .masthead-top{grid-area:top;align-self:start}
+  .cover-mid{display:contents}                /* promote masthead + photo into the grid */
+  .masthead{grid-area:title;align-self:center;text-align:left}
+  .masthead .pre{justify-content:flex-start}
+  .masthead .pre span:last-child{display:none}
+  .title{font-size:clamp(3.6rem,6.2vw,6.6rem)}
+  .subtitle{font-size:.8rem}
+  .cover-photo{grid-area:photo;width:100%;height:100%;min-height:0;margin:0}
+  .cover-foot{grid-area:foot;align-self:end}
+  .scroll-hint{display:none}
+
+  /* ---- wider sections, more generous rhythm ---- */
+  .wrap{max-width:1000px}
+  section{padding:104px 48px}
+  .sec-tag{font-size:.66rem}
+
+  /* editor's letter reads as a centred article column */
+  .letter{max-width:720px;margin-inline:auto}
+  .letter .body-serif{font-size:1.18rem;line-height:1.7}
+
+  /* contact sheet: bigger frames, the strip fills the width */
+  .frames{padding:8px 26px;gap:18px;justify-content:flex-start}
+  .frame{width:236px}
+  .frame .cap{font-size:.62rem}
+
+  /* feature spread: contained and balanced */
+  .spread{max-width:840px;margin:28px auto 0;height:600px;min-height:0}
+  .spread .quote p{font-size:2rem}
+
+  /* stats: a single row of four */
+  .stats{grid-template-columns:repeat(4,1fr);gap:18px}
+  .stat:nth-child(3){grid-column:auto}
+  .stat{padding:24px 18px}
+
+  /* polaroids sit side by side, a touch larger */
+  .polas{gap:40px}
+  .pola{width:300px}
+
+  /* closing keeps its centred measure */
+  .colophon{max-width:680px;margin-inline:auto;padding-bottom:120px}
+  .colophon .big{font-size:3.4rem}
+
+  /* a clearer hover affordance on desktop */
+  .frame .holder,.pola{transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  .frame:hover .holder{transform:translateY(-6px)}
+  .pola:hover{transform:translateY(-6px) rotate(0deg)}
+}
+
+/* very large screens: stop it sprawling */
+@media (min-width:1500px){
+  .cover{max-width:1320px}
+  .wrap{max-width:1080px}
+}
+
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms!important;animation-iteration-count:1!important;
     transition-duration:.2s!important;scroll-behavior:auto!important}
